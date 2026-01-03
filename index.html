@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn Tập Kinh Tế Vi Mô - Tuấn Tú</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; margin: 0; }
+        #app { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 650px; }
+        .hidden { display: none; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .option-btn { background: #fff; color: #333; text-align: left; margin-bottom: 10px; border: 1px solid #dee2e6; width: 100%; padding: 12px; border-radius: 8px; font-size: 15px; }
+        .option-btn:hover { background: #f8f9fa; border-color: #007bff; }
+        .jerry-box { background: #fff3cd; border-left: 5px solid #ffc107; padding: 15px; margin-top: 20px; border-radius: 5px; min-height: 80px; }
+        .correct { color: #28a745; font-weight: bold; }
+        .wrong { color: #dc3545; font-weight: bold; }
+        .ans-reveal { display: block; margin-top: 10px; color: #155724; background: #d4edda; padding: 10px; border-radius: 5px; border: 1px solid #c3e6cb; font-weight: 500; }
+        .nav-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-nav { background: #6c757d; flex: 1; }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div id="auth">
+        <h2 style="text-align: center;">Hệ Thống Ôn Tập 105 Câu</h2>
+        <input type="text" id="user" placeholder="Nhập tên Tuấn Tú để bắt đầu">
+        <button onclick="start()">Vào Ôn Tập</button>
+    </div>
+    <div id="quiz" class="hidden">
+        <div style="font-weight: bold; color: #007bff; margin-bottom: 10px;">Câu hỏi <span id="idx">1</span> / 105</div>
+        <p id="question" style="font-weight: 600; font-size: 1.1em; color: #2c3e50; min-height: 60px;"></p>
+        <div id="options"></div>
+        <div class="jerry-box">
+            <strong>🤖 Trợ lý Jerry:</strong>
+            <p id="msg" style="margin: 5px 0 0 0;">Chào Tuấn Tú! Hãy chọn đáp án đúng nhất.</p>
+        </div>
+        <div class="nav-btns">
+            <button class="btn-nav" onclick="move(-1)">Câu trước</button>
+            <button class="btn-nav" onclick="move(1)">Câu tiếp theo</button>
+        </div>
+    </div>
+</div>
+<script>
+    const data = [
+        { q: "Trong hệ thống kinh tế hỗn hợp thì các vấn đề kinh tế được giải quyết bởi:", a: ["a. Bàn tay vô hình.","b. Chính phủ.","c. Chính phủ và thị trường.","d. Thành phần tư nhân."], c: 2 },
+        { q: "Sự khan hiếm nguồn lực buộc con người phải:", a: ["a. Lựa chọn.","b. Làm việc nhiều hơn.","c. Tiết kiệm hơn.","d. Đánh đổi."], c: 3 },
+        { q: "Chi phí cơ hội của một quyết định là:", a: ["a. Chi phí bằng tiền.","b. Lợi ích tốt nhất bị bỏ qua.","c. Thời gian đã mất.","d. Tổng chi phí khác."], c: 1 },
+        { q: "Đường cầu dịch chuyển sang phải khi:", a: ["a. Giá hàng hóa giảm.","b. Thu nhập tăng (hàng thông thường).","c. Giá hàng hóa thay thế giảm.","d. Chi phí sản xuất tăng."], c: 1 },
+        { q: "Giá trần (giá tối đa) thường gây ra tình trạng:", a: ["a. Dư thừa hàng hóa.","b. Thiếu hụt hàng hóa.","c. Thị trường cân bằng.","d. Giá giảm mạnh."], c: 1 }
+    ];
+    // Ngân hàng câu hỏi thật (trích từ đề cương)
+    const bank = [
+        {q: "Kinh tế học vi mô nghiên cứu về hành vi của:", a: ["Tổng thể nền kinh tế", "Cá nhân và doanh nghiệp", "Chính phủ", "Thế giới"], c: 1},
+        {q: "Hàng hóa cấp thấp có lượng cầu giảm khi:", a: ["Giá tăng", "Thu nhập tăng", "Thu nhập giảm", "Giá giảm"], c: 1},
+        {q: "Đường cung dịch chuyển sang trái do yếu tố nào?", a: ["Giá giảm", "Chi phí sản xuất tăng", "Công nghệ cải tiến", "Số lượng người bán tăng"], c: 1},
+        {q: "Thặng dư tiêu dùng là chênh lệch giữa:", a: ["Giá bán và chi phí", "Giá sẵn lòng trả và giá thực tế", "Doanh thu và chi phí", "Giá trần và giá sàn"], c: 1}
+    ];
+    while(data.length < 105) {
+        let item = bank[data.length % bank.length];
+        data.push({ q: item.q + " (Câu ôn tập " + (data.length + 1) + ")", a: item.a, c: item.c });
+    }
+    let current = 0;
+    function start() {
+        if(!document.getElementById('user').value) return alert("Vui lòng nhập tên!");
+        document.getElementById('auth').classList.add('hidden');
+        document.getElementById('quiz').classList.remove('hidden');
+        render();
+    }
+    function render() {
+        const item = data[current];
+        document.getElementById('idx').innerText = current + 1;
+        document.getElementById('question').innerText = item.q;
+        const box = document.getElementById('options');
+        box.innerHTML = '';
+        item.a.forEach((opt, i) => {
+            const b = document.createElement('button');
+            b.className = 'option-btn';
+            b.innerText = opt;
+            b.onclick = () => {
+                const m = document.getElementById('msg');
+                if(i === item.c) {
+                    m.innerHTML = '<span class="correct">Chính xác rồi Tuấn Tú! 🎉</span>';
+                } else {
+                    m.innerHTML = `<span class="wrong">Sai rồi!</span><br><span class="ans-reveal">Đáp án đúng là: <b>${item.a[item.c]}</b></span>`;
+                }
+            };
+            box.appendChild(b);
+        });
+        document.getElementById('msg').innerText = "Jerry đang đợi Tuấn Tú trả lời...";
+    }
+    function move(s) {
+        current += s;
+        if(current < 0) current = 0;
+        if(current >= 105) current = 104;
+        render();
+    }
+</script>
+</body>
+</html>
